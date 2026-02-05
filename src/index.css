@@ -1,0 +1,1009 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
+
+:root {
+  --text-main: #2d3436;
+  --bg-app: #f4f6f8;
+  --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.95);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg-app);
+  color: var(--text-main);
+  height: 100vh;
+  overflow: hidden;
+  /* Scroll bloqué sur PC (c'est le main-content qui scrolle) */
+  transition: background-color 0.5s ease-in-out;
+}
+
+/* --- STRUCTURE GLOBALE --- */
+.app-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  padding: 20px;
+  gap: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.2) 100%);
+  position: relative;
+  z-index: 1;
+}
+
+/* --- SIDEBAR (Liste) --- */
+/* Wrapper nécessaire pour le responsive */
+::-webkit-scrollbar {
+  width: 0;
+}
+
+.sidebar-wrapper {
+  display: contents;
+}
+
+.sidebar {
+  width: 320px;
+  background: white;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  height: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: 2px solid #edf2f7;
+  background: #f7fafc;
+  font-weight: 600;
+  margin-bottom: 15px;
+  outline: none;
+  font-family: inherit;
+}
+
+.search-input:focus {
+  border-color: #cbd5e0;
+  background: white;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 5px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-left: 4px solid transparent;
+}
+
+.list-item:hover {
+  background: #f1f2f6;
+  transform: translateX(5px);
+}
+
+.list-item.active {
+  background: #ebf8ff;
+  border-left-color: #3182ce;
+  font-weight: bold;
+}
+
+/* --- CONTENU PRINCIPAL --- */
+.main-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 20px;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* --- VISUEL HOLOGRAPHIQUE (Gauche) --- */
+.holo-card {
+  background: white;
+  border-radius: 24px;
+  position: relative;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 20px;
+  /* Important pour le grid */
+  height: 100%;
+}
+
+.holo-circle {
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  opacity: 0.2;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  filter: blur(40px);
+  pointer-events: none;
+}
+
+.pokemon-model {
+  width: 340px;
+  z-index: 2;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.25));
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+}
+
+.pokemon-model:hover {
+  transform: scale(1.05) translateY(-10px);
+}
+
+/* --- DATA TERMINAL (Droite) --- */
+.data-terminal {
+  /* Anciennement .data-card */
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 30px;
+  overflow-y: auto;
+  height: 100%;
+  min-height: 0;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollbar Stylisée */
+.data-terminal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.data-terminal::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
+.data-terminal::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.data-terminal::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.section-title {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #a0aec0;
+  font-weight: 800;
+  margin-bottom: 15px;
+  margin-top: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* --- GRILLES D'INFOS --- */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.info-box {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+  border: 1px solid #edf2f7;
+}
+
+.info-label {
+  font-size: 0.7rem;
+  color: #718096;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.info-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+/* --- TABS --- */
+.tabs-scroll-container {
+  display: flex;
+  gap: 20px;
+  border-bottom: 1px solid #edf2f7;
+  margin-bottom: 25px;
+  padding: 5px 5px 0 5px;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 10px;
+  scrollbar-width: none;
+}
+
+.tabs-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 10px 5px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #a0aec0;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  margin-bottom: -1px;
+  flex-shrink: 0;
+}
+
+.tab-button:hover {
+  color: #718096;
+}
+
+.tab-button.active {
+  color: #2d3436;
+  border-bottom-color: #2d3436;
+}
+
+/* J'ai rajouté ça car il manquait la classe active */
+
+/* --- TEAM DOCK --- */
+.team-dock-container {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%) translateY(calc(100% - 45px));
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.team-dock-container.open {
+  transform: translateX(-50%) translateY(-10px);
+}
+
+.dock-handle {
+  background: #2d3748;
+  color: white;
+  padding: 8px 30px;
+  border-radius: 20px 20px 0 0;
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  width: fit-content;
+  z-index: 2;
+}
+
+.dock-handle:hover {
+  background: #1a202c;
+}
+
+.team-dock {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 15px 20px;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  gap: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  margin-top: -1px;
+}
+
+.team-slot {
+  width: 70px;
+  height: 70px;
+  background: #edf2f7;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.team-slot:hover {
+  transform: translateY(-5px) scale(1.05);
+  background: white;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.empty-slot {
+  font-size: 2rem;
+  color: #cbd5e0;
+  font-weight: 300;
+}
+
+.team-sprite {
+  width: 55px;
+  height: 55px;
+  z-index: 1;
+  image-rendering: pixelated;
+}
+
+.remove-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #e53e3e;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: 0.2s;
+  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.team-slot:hover .remove-btn {
+  opacity: 1;
+}
+
+.analyze-btn {
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.8rem;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(108, 92, 231, 0.3);
+  transition: 0.2s;
+  margin-left: 15px;
+  height: 40px;
+  align-self: center;
+}
+
+/* --- MODALE --- */
+.analysis-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(5px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.analysis-modal {
+  background: white;
+  width: 900px;
+  max-width: 90%;
+  max-height: 90vh;
+  border-radius: 24px;
+  padding: 40px;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow-y: auto;
+}
+
+.close-btn-modal {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #f1f2f6;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #2d3748;
+  transition: 0.2s;
+}
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.analysis-card {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid #edf2f7;
+}
+
+/* --- LOADER POKEBALL --- */
+.loader-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  gap: 20px;
+  color: #718096;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.pokeball-animated {
+  width: 60px;
+  height: 60px;
+  background: white;
+  border: 4px solid #2d3436;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset -5px -5px 15px rgba(0, 0, 0, 0.1);
+  animation: shake 1.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+  transform-origin: bottom center;
+}
+
+.pokeball-animated::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: #ff5350;
+  border-bottom: 4px solid #2d3436;
+}
+
+.pokeball-animated::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px;
+  height: 18px;
+  background: white;
+  border: 4px solid #2d3436;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+  animation: blink 1.5s infinite;
+}
+
+@keyframes shake {
+  0% {
+    transform: translate(0, 0) rotate(0);
+  }
+
+  20% {
+    transform: translate(-3px, 0) rotate(-20deg);
+  }
+
+  40% {
+    transform: translate(3px, 0) rotate(20deg);
+  }
+
+  60% {
+    transform: translate(-3px, 0) rotate(-10deg);
+  }
+
+  80% {
+    transform: translate(3px, 0) rotate(10deg);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(0);
+  }
+}
+
+@keyframes blink {
+  0% {
+    background: white;
+  }
+
+  50% {
+    background: #ff5350;
+    box-shadow: 0 0 10px #ff5350;
+  }
+
+  100% {
+    background: white;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================
+   RESPONSIVE DESIGN (CORRECTIF)
+   ========================================= */
+
+/* Par défaut (Desktop > 1024px) : Sidebar visible, Layout Grid */
+.mobile-menu-btn,
+.close-sidebar-btn,
+.sidebar-overlay {
+  display: none;
+}
+
+
+/* --- TABLETTES (< 1024px) --- */
+@media (max-width: 1024px) {
+  
+  /* 1. ON DÉBLOQUE LE SCROLL GLOBAL */
+  body { overflow: auto; height: auto; }
+  
+  .app-container { 
+    height: auto; 
+    min-height: 100vh; /* Prend au moins toute la hauteur de l'écran */
+    overflow: visible; 
+    display: block; 
+    /* On laisse de la place en bas pour le Dock (120px) */
+    padding: 20px 20px 120px 20px; 
+  }
+
+  /* 2. MENU LATÉRAL CACHÉ */
+  .sidebar-wrapper {
+    display: block; position: fixed; top: 0; left: 0; height: 100vh; width: 300px;
+    z-index: 1000; transform: translateX(-100%); transition: transform 0.3s ease;
+    background: white; box-shadow: 10px 0 30px rgba(0,0,0,0.2);
+  }
+  .sidebar-wrapper.open { transform: translateX(0); }
+  .sidebar { width: 100%; border-radius: 0; box-shadow: none; }
+  
+  .sidebar-overlay { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; backdrop-filter: blur(3px); }
+  
+  .mobile-menu-btn { display: block; position: fixed; top: 15px; left: 15px; z-index: 900; background: white; border: none; padding: 10px 15px; border-radius: 30px; font-weight: 800; color: #2d3748; box-shadow: 0 4px 15px rgba(0,0,0,0.15); cursor: pointer; }
+  .close-sidebar-btn { display: block; position: absolute; top: 15px; right: 15px; background: #f1f2f6; border: none; width: 35px; height: 35px; border-radius: 50%; z-index: 10; font-size: 1.2rem; cursor: pointer;}
+
+  /* 3. LE CORRECTIF : HAUTEUR DYNAMIQUE */
+  .main-content {
+    display: grid; 
+    grid-template-columns: 1fr 1.2fr; /* On garde les 2 colonnes */
+    
+    /* CALCUL MAGIQUE : 100vh (Ecran total) - 180px (Espaces haut + bas) 
+       Cela force la grille à descendre jusqu'en bas du padding de l'app-container
+    */
+    min-height: calc(100vh - 180px); 
+    
+    height: auto;
+    overflow: visible;
+    padding-top: 60px; /* Place pour le bouton menu */
+    gap: 20px;
+    align-items: stretch; /* Force les enfants à s'étirer à la même hauteur */
+  }
+  
+  /* 4. CARTES ÉTIRÉES */
+  .holo-card, .data-terminal {
+    height: auto; /* Plus de hauteur fixe ! */
+    min-height: 100%; /* S'étire pour remplir la grille */
+  }
+
+  .team-dock-container { width: 95%; }
+}
+
+
+/* --- MOBILES (< 768px) --- 
+   Ici, on casse la grille. On empile tout.
+*/
+
+/* --- MOBILES (< 768px) --- */
+@media (max-width: 768px) {
+
+  /* 1. SCROLL GLOBAL */
+  .app-container { 
+    padding: 10px 10px 100px 10px; 
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto; 
+    display: block; 
+  }
+
+  .main-content {
+    display: flex;       
+    flex-direction: column;
+    padding-top: 60px;
+    gap: 20px;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* 2. VISUEL (HOLO-CARD) */
+  .holo-card {
+    width: 100%;
+    height: auto;
+    min-height: 450px;
+    padding: 30px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  /* CERCLE DE FOND */
+  .holo-circle {
+    width: 300px; 
+    height: 300px;
+    top: 30%;
+  }
+
+  /* IMAGE POKÉMON */
+  .pokemon-model { 
+    width: 280px; 
+    max-width: 80%;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 15px 30px rgba(0,0,0,0.3));
+  }
+
+  /* --- CORRECTIF BUG NOM --- */
+  
+  /* Cible UNIQUEMENT le gros numéro de fond (enfant direct >) */
+  .holo-card > h1:first-of-type { 
+    font-size: 5rem !important; 
+    top: 10px;
+    left: 20px;
+    position: absolute;
+    /*opacity: 0.1;  Plus discret */
+  }
+
+  /* Cible le NOM du Pokémon (qui est dans une div) pour le remettre à sa place */
+  .holo-card div h1 {
+    position: relative !important; /* Force la position normale */
+    font-size: 2.5rem !important; /* Taille adaptée au mobile */
+    margin-top: 10px;
+    line-height: 1.2;
+    word-wrap: break-word; /* Évite que ça dépasse */
+  }
+  
+  /* Ajustement du conteneur du nom */
+  .holo-card div[style*="text-align:center"] {
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  /* 3. DONNÉES (DATA-TERMINAL) */
+  .data-terminal { 
+    width: 100%; 
+    height: auto;
+    overflow: visible; 
+    padding: 25px 20px; 
+    border-radius: 20px;
+  }
+
+  .info-grid { gap: 10px; }
+  .section-title { margin-top: 15px; }
+
+  /* 4. DOCK & MODALE */
+  .team-dock-container { width: 100%; bottom: 0; }
+  .team-dock { 
+    width: 100%; justify-content: center; border-radius: 0; 
+    border-top: 1px solid rgba(255,255,255,0.5); padding-bottom: 25px;
+  }
+  .dock-handle { width: 100%; border-radius: 15px 15px 0 0; }
+  
+  .analysis-modal { width: 100%; height: 100%; border-radius: 0; padding: 20px; }
+  .analysis-grid { grid-template-columns: 1fr; }
+}
+
+/* --- TAB EVOLUTION (Version Grille Propre) --- */
+
+.evo-tree-root {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 1000px;
+  margin-top: 30px;
+  padding-bottom: 20px;
+}
+
+.evo-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* --- CONNECTEUR SIMPLE --- */
+.evo-connector-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 50px;
+  justify-content: flex-end; /* Colle le badge vers le bas */
+  position: relative;
+  z-index: 0;
+  margin-bottom: -5px; /* Pour que la flèche touche la carte */
+}
+
+/* La ligne grise (affichée uniquement pour les listes simples verticales) */
+.evo-line-top {
+  width: 3px;
+  height: 100%;
+  background: #cbd5e0;
+  position: absolute;
+  top: 0;
+  z-index: -1;
+}
+
+.evo-condition-badge {
+  background: white;
+  border: 2px solid #edf2f7;
+  border-radius: 12px;
+  padding: 5px 12px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #718096;
+  text-transform: uppercase;
+  z-index: 2;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 5px;
+}
+
+.evo-arrow-down {
+  font-size: 0.8rem;
+  color: #cbd5e0;
+  background: white;
+  z-index: 1;
+  line-height: 1;
+}
+
+/* --- CARTE POKÉMON --- */
+.evo-card-wrapper {
+  background: white;
+  border: 2px solid #edf2f7;
+  border-radius: 20px;
+  padding: 10px 15px;
+  width: 240px; /* Taille standard */
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 5;
+  position: relative;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+.evo-card-wrapper:hover {
+  transform: translateY(-3px);
+  border-color: #cbd5e0;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+.evo-card-wrapper.current {
+  border-color: #2d3748;
+  background: #f7fafc;
+  cursor: default;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.evo-img-frame {
+  width: 65px; height: 65px;
+  background: #f7fafc; border-radius: 15px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.evo-img-frame img { width: 55px; height: 55px; object-fit: contain; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.1)); }
+
+.evo-text-content { display: flex; flex-direction: column; overflow: hidden; justify-content: center; flex: 1; }
+.evo-id { font-size: 0.75rem; color: #a0aec0; font-weight: 800; letter-spacing: 1px; }
+.evo-name { font-size: 1.1rem; font-weight: 800; color: #2d3748; text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.current-badge { font-size: 0.65rem; background: #2d3748; color: white; padding: 3px 8px; border-radius: 6px; width: fit-content; margin-top: 4px; font-weight: 700; text-transform: uppercase; }
+
+
+/* --- MODE "BRANCHING" (POUR ÉVOLI & CO) --- */
+
+.evo-children-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.evo-children-container.branching {
+  /* On ajoute de l'espace en haut pour ne pas couper les badges */
+  margin-top: 40px; 
+  position: relative;
+}
+
+/* PETITE LIGNE VERTICALE CENTRALE (Relie Évoli à la grille) */
+.evo-children-container.branching::before {
+  content: '';
+  position: absolute;
+  top: -20px; /* Part du bas d'Évoli */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 40px; /* Descend jusqu'au milieu de la première rangée de badges */
+  background: #cbd5e0;
+  z-index: 0;
+}
+
+.evo-children-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+  margin-top: 0;
+}
+
+/* GRILLE PROPRE */
+.evo-children-container.branching .evo-children-list {
+  flex-direction: row;
+  flex-wrap: wrap; 
+  justify-content: center;
+  /* On augmente l'écart vertical pour que les badges du bas respirent */
+  gap: 30px; 
+  align-items: flex-start;
+}
+
+/* MODIFICATION DES CONNECTEURS DANS LA GRILLE */
+.evo-children-container.branching .evo-connector-vertical {
+  height: auto; /* Hauteur auto pour ne pas couper le contenu */
+  margin-bottom: 5px; /* Un peu d'espace avant la carte */
+  justify-content: flex-end;
+}
+
+/* On cache la grande tige du haut pour les enfants de la grille (c'est plus aéré) */
+.evo-children-container.branching .evo-line-top {
+  display: none;
+}
+
+/* On s'assure que le badge est bien visible et pas coupé */
+.evo-children-container.branching .evo-condition-badge {
+  margin-top: 0;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05); /* Ombre un peu plus marquée pour qu'il ressorte */
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .evo-card-wrapper { width: 100%; max-width: 280px; }
+  .evo-children-container.branching .evo-children-list { gap: 20px; }
+  /* Sur mobile, on cache la petite ligne centrale car l'alignement change */
+  .evo-children-container.branching::before { display: none; }
+}
+
+
+/* --- TYPE WEAKNESS --- */
+.weakness-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.mult-label {
+  font-weight: 800;
+  font-size: 0.8rem;
+  width: 30px;
+  margin-right: 10px;
+}
+.mult-label.danger { color: #e53e3e; }  /* Rouge */
+.mult-label.warning { color: #dd6b20; } /* Orange */
+.mult-label.immune { color: #718096; text-decoration: line-through; } /* Gris barré */
+.badges {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* --- BOUTONS D'ACTION (SHINY / AUDIO) --- */
+.action-btn {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: none;
+  background: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #cbd5e0;
+}
+
+.action-btn:hover {
+  transform: scale(1.1);
+  color: #2d3748;
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+}
+
+/* État Playing Audio */
+.action-btn.playing {
+  background: #2d3748;
+  color: white;
+  animation: pulseAudio 0.5s infinite;
+}
+
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes pulseAudio { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+/* --- TYPE WEAKNESS --- */
+.weakness-row {
+  display: flex;
+  align-items: center; /* Aligne le "x2" avec les badges */
+  margin-bottom: 8px;
+}
+
+/* Petit titre de section (Faiblesses / Résistances) */
+.section-sub-title {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+  opacity: 0.8;
+}
+.section-sub-title.danger { color: #e53e3e; }
+.section-sub-title.success { color: #38a169; }
+.section-sub-title.neutral { color: #718096; }
+
+
+/* Les labels multiplicateurs */
+.mult-label {
+  font-weight: 900;
+  font-size: 0.9rem;
+  width: 40px; /* Largeur fixe pour aligner verticalement */
+  margin-right: 5px;
+  text-align: right;
+  padding-right: 10px;
+  border-right: 2px solid #edf2f7; /* Petite ligne de séparation */
+}
+
+.mult-label.danger { color: #e53e3e; }         /* x4 Rouge */
+.mult-label.warning { color: #dd6b20; }        /* x2 Orange */
+.mult-label.resistant { color: #38a169; }      /* x0.5 Vert */
+.mult-label.super-resistant { color: #2f855a;} /* x0.25 Vert Foncé */
+.mult-label.immune { color: #a0aec0; text-decoration: line-through; } /* x0 Gris */
+
+.badges {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 10px; /* Espace après la ligne grise */
+}
