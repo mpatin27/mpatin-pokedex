@@ -8,7 +8,7 @@
 
 Ce projet est une **Single Page Application (SPA)** qui réinvente l'expérience du Pokédex classique avec un design soigné, des animations fluides et une navigation intuitive.
 
-🔗 **Live Demo :** `[Lien vers le déploiement à ajouter]`
+🔗 **Live Demo :** [mpatin-pokedex](https://mpatin-pokedex.vercel.app/)
 
 ---
 
