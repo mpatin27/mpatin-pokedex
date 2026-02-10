@@ -257,10 +257,10 @@ export default function App() {
   useEffect(() => {
     // CORRECTION : On vérifie d'abord si un ID est sélectionné
     if (selectedId && pokemonData) {
-      document.title = `#${String(pokemonData.speciesId).padStart(3,'0')} ${pokemonData.frName} | CobbleDex`;
+      document.title = `#${String(pokemonData.speciesId).padStart(3,'0')} ${pokemonData.frName} | PokéDex`;
     } else {
       // Si pas d'ID, c'est l'accueil (même si pokemonData traîne encore en mémoire)
-      document.title = 'CobbleDex - Accueil';
+      document.title = 'PokéDex - Accueil';
       
       // Nettoyage de l'URL
       if (!appLoading) {
