@@ -16,7 +16,7 @@ const genConfig = [
   { id: 5, name: "V - Unys", offset: 493, limit: 156 },
   { id: 6, name: "VI - Kalos", offset: 649, limit: 72 },
   { id: 7, name: "VII - Alola", offset: 721, limit: 88 },
-  { id: 8, name: "VIII - Galar", offset: 809, limit: 89 },
+  { id: 8, name: "VIII - Galar", offset: 809, limit: 96 },
   { id: 9, name: "IX - Paldea", offset: 905, limit: 120 },
 ];
 
