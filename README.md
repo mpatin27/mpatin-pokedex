@@ -1,4 +1,4 @@
-# Pokédex Moderne (Cobbledex)
+# Pokédex Moderne
 
 > Une interface de Pokédex moderne et interactive, conçue pour offrir une expérience visuelle riche et fluide en utilisant React et la PokéAPI.
 
