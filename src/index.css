@@ -924,3 +924,39 @@ input.search-input {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* --- TOAST NOTIFICATION --- */
+.toast-notification {
+  position: fixed;
+  bottom: 30px;        /* Distance du bas */
+  left: 50%;           /* Centré horizontalement */
+  transform: translateX(-50%); /* Ajustement précis du centrage */
+  
+  background-color: rgba(45, 55, 72, 0.95); /* Gris foncé presque opaque */
+  color: white;
+  padding: 12px 24px;
+  border-radius: 50px; /* Bords très arrondis */
+  
+  font-weight: 600;
+  font-size: 0.95rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Ombre portée */
+  z-index: 9999;       /* Toujours au-dessus de tout */
+  
+  display: flex;
+  align-items: center;
+  gap: 10px;           /* Espace entre icône et texte */
+  
+  animation: slideUpFade 0.4s ease-out forwards;
+}
+
+/* Animation d'entrée : arrive du bas */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}

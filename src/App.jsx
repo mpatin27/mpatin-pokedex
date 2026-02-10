@@ -4,7 +4,7 @@ import PokemonVisual from './components/detail/PokemonVisual';
 import PokemonData from './components/detail/PokemonData';
 import Welcome from './components/Welcome';
 import PokemonBackground from './components/PokemonBackground';
-import SplashScreen from './components/SplashScreen'; // <--- NOUVEL IMPORT
+import SplashScreen from './components/SplashScreen';
 import './index.css';
 
 // Configuration des Générations
@@ -22,11 +22,11 @@ const genConfig = [
 
 export default function App() {
   // --- ÉTATS GLOBAUX ---
-  const [appLoading, setAppLoading] = useState(true); // <--- ÉTAT SPLASH SCREEN
-
+  const [appLoading, setAppLoading] = useState(true); // Splash Screen
+  
   const [pokemonList, setPokemonList] = useState([]);
   const [fullListLite, setFullListLite] = useState([]); // Liste légère pour la recherche
-
+  
   const [selectedId, setSelectedId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("all");
@@ -42,32 +42,31 @@ export default function App() {
   const initialized = useRef(false);
 
   // --- FONCTION DE CHARGEMENT DE GÉNÉRATION ---
-  // Définie ici pour être utilisée par l'initialisation et la navigation
   const loadGeneration = async (genId) => {
     setIsListLoading(true);
     try {
       const config = genConfig.find(g => g.id === genId);
       const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${config.limit}&offset=${config.offset}`);
       const data = await res.json();
-
+      
       const promises = data.results.map(async (p) => {
-        const parts = p.url.split('/');
-        const id = parseInt(parts[parts.length - 2]);
+         const parts = p.url.split('/');
+         const id = parseInt(parts[parts.length - 2]);
+         
+         let frName = p.name;
+         try {
+             const specRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
+             const specData = await specRes.json();
+             const nameObj = specData.names.find(n => n.language.name === 'fr');
+             if (nameObj) frName = nameObj.name;
+         } catch (e) {}
 
-        let frName = p.name;
-        try {
-          const specRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
-          const specData = await specRes.json();
-          const nameObj = specData.names.find(n => n.language.name === 'fr');
-          if (nameObj) frName = nameObj.name;
-        } catch (e) { }
-
-        return {
-          id: id,
-          name: frName,
-          enName: p.name,
-          sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
-        };
+         return {
+            id: id,
+            name: frName,
+            enName: p.name,
+            sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
+         };
       });
 
       const formattedList = await Promise.all(promises);
@@ -79,7 +78,7 @@ export default function App() {
     }
   };
 
-  // --- 1. BOOT APPLICATION (SPLASH SCREEN & DATA) ---
+  // --- 1. BOOT APPLICATION (SPLASH SCREEN & URL SYNC) ---
   useEffect(() => {
     const boot = async () => {
       // A. Chargement de la liste globale (pour la recherche)
@@ -95,30 +94,39 @@ export default function App() {
         } catch (e) { console.error("Erreur boot global", e); }
       };
 
-      // B. Chargement de la Gen 1
-      const fetchGen1 = async () => {
-        await loadGeneration(1);
-      };
+      // B. Lecture de l'URL pour savoir quoi charger (Partage de lien)
+      const params = new URLSearchParams(window.location.search);
+      const sharedId = params.get('id');
+      
+      let startGen = 1;
+      if (sharedId) {
+         // Si un ID est présent dans l'URL, on trouve sa génération
+         const id = parseInt(sharedId);
+         const targetGen = genConfig.find(g => id > g.offset && id <= (g.offset + g.limit));
+         if (targetGen) startGen = targetGen.id;
+         
+         setSelectedId(id); // On sélectionne le Pokémon directement
+         setCurrentGen(startGen); // On se place sur la bonne génération
+      }
 
-      // On lance tout en parallèle
-      await Promise.all([fetchGlobal(), fetchGen1()]);
+      // C. Lancement des chargements
+      await Promise.all([fetchGlobal(), loadGeneration(startGen)]);
 
-      // C. Délai esthétique pour le Splash Screen (2.5s min)
+      // D. Délai esthétique pour le Splash Screen (2.5s min)
       setTimeout(() => {
-        setAppLoading(false); // Cache le splash, révèle l'app
+        setAppLoading(false);
       }, 2500);
     };
 
     if (!initialized.current) {
-      initialized.current = true;
-      boot();
+        initialized.current = true;
+        boot();
     }
-  }, []); // Exécuté une seule fois au montage
+  }, []);
 
 
   // --- 2. LOGIQUE DE RECHERCHE & FILTRAGE ---
   useEffect(() => {
-    // On ne fait rien tant que l'app charge (optimisation)
     if (appLoading) return;
 
     const term = searchTerm.toLowerCase().trim();
@@ -150,35 +158,33 @@ export default function App() {
           const res = await fetch(`https://pokeapi.co/api/v2/type/${selectedType}`);
           const data = await res.json();
           const formatted = data.pokemon.map(p => {
-            const parts = p.pokemon.url.split('/');
-            const id = parseInt(parts[parts.length - 2]);
-            if (id > 10000 && id < 10100) return null;
-            return {
-              id: id,
-              name: p.pokemon.name,
-              enName: p.pokemon.name,
-              sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
-            };
+             const parts = p.pokemon.url.split('/');
+             const id = parseInt(parts[parts.length - 2]);
+             if (id > 10000 && id < 10100) return null;
+             return {
+                id: id,
+                name: p.pokemon.name,
+                enName: p.pokemon.name,
+                sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
+             };
           }).filter(p => p !== null);
           setPokemonList(formatted);
-        } catch (e) { console.error(e); }
+        } catch(e) { console.error(e); }
         finally { setIsListLoading(false); }
       };
       fetchByType();
       return;
     }
 
-    // C. RETOUR GEN (CORRIGÉ)
+    // C. RETOUR GEN (Permet de revenir aux Gens précédentes)
     if (!shouldSearch && selectedType === "all") {
-        // On calcule quel devrait être le premier ID de la liste (ex: 1 pour Kanto, 152 pour Johto)
         const expectedStartId = genConfig[currentGen - 1].offset + 1;
-        
-        // Si la liste est vide OU si le premier Pokémon n'est pas le bon = ON RECHARGE
+        // Si la liste est vide OU si le premier Pokémon n'est pas celui attendu
         if (pokemonList.length === 0 || (pokemonList[0] && pokemonList[0].id !== expectedStartId)) {
              loadGeneration(currentGen);
         }
     }
-  }, [searchTerm, selectedType, currentGen, fullListLite, appLoading]);
+  }, [searchTerm, selectedType, currentGen, fullListLite, appLoading]); 
 
 
   // --- 3. CHARGEMENT DÉTAILS ---
@@ -187,7 +193,7 @@ export default function App() {
 
     const fetchData = async () => {
       setLoading(true);
-      setPokemonData(null);
+      setPokemonData(null); 
 
       try {
         const pokemonInList = pokemonList.find(p => p.id === selectedId);
@@ -203,24 +209,28 @@ export default function App() {
 
         const frName = speciesData.names.find(n => n.language.name === 'fr')?.name || data.name;
         const genus = speciesData.genera.find(g => g.language.name === 'fr')?.genus || 'Pokémon';
-
-        // --- DESCRIPTION (FRANÇAIS OU ANGLAIS) ---
+        
         let descEntry = speciesData.flavor_text_entries.find(f => f.language.name === 'fr');
         if (!descEntry) {
-          descEntry = speciesData.flavor_text_entries.find(f => f.language.name === 'en');
+            descEntry = speciesData.flavor_text_entries.find(f => f.language.name === 'en');
         }
-        const desc = descEntry
-          ? descEntry.flavor_text.replace(/[\n\f]/g, ' ')
-          : "Pas de description disponible.";
+        const desc = descEntry 
+            ? descEntry.flavor_text.replace(/[\n\f]/g, ' ') 
+            : "Pas de description disponible.";
 
-        const captureRate = speciesData.capture_rate;
+        const captureRate = speciesData.capture_rate; 
 
         const colorMap = {
-          green: '#48bb78', red: '#f56565', blue: '#4299e1', white: '#a0aec0',
-          brown: '#ed8936', yellow: '#ecc94b', purple: '#9f7aea', pink: '#ed64a6',
-          gray: '#718096', black: '#2d3748'
+            green: '#48bb78', red: '#f56565', blue: '#4299e1', white: '#a0aec0',
+            brown: '#ed8936', yellow: '#ecc94b', purple: '#9f7aea', pink: '#ed64a6',
+            gray: '#718096', black: '#2d3748'
         };
         const mainColor = colorMap[speciesData.color.name] || '#cbd5e0';
+
+        // --- MISE À JOUR DE L'URL (sans recharger la page) ---
+        const newUrl = new URL(window.location);
+        newUrl.searchParams.set('id', selectedId);
+        window.history.pushState({}, '', newUrl);
 
         setPokemonData({
           ...data,
@@ -234,19 +244,37 @@ export default function App() {
 
       } catch (err) {
         console.error(err);
-        setPokemonData(null);
+        setPokemonData(null); 
       } finally {
         setLoading(false);
       }
     };
-
+    
     fetchData();
-  }, [selectedId]);
+  }, [selectedId]); 
 
-  // --- 4. NAVIGATION CLAVIER ---
+  // --- 4. SEO DYNAMIQUE (Méthode Native) & RESET URL ---
+  useEffect(() => {
+    // CORRECTION : On vérifie d'abord si un ID est sélectionné
+    if (selectedId && pokemonData) {
+      document.title = `#${String(pokemonData.speciesId).padStart(3,'0')} ${pokemonData.frName} | CobbleDex`;
+    } else {
+      // Si pas d'ID, c'est l'accueil (même si pokemonData traîne encore en mémoire)
+      document.title = 'CobbleDex - Accueil';
+      
+      // Nettoyage de l'URL
+      if (!appLoading) {
+          const newUrl = new URL(window.location);
+          newUrl.searchParams.delete('id');
+          window.history.pushState({}, '', newUrl);
+      }
+    }
+  }, [pokemonData, selectedId, appLoading]);
+
+  // --- 5. NAVIGATION CLAVIER ---
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.target.tagName === 'INPUT') return; // Ignore si on tape dans la recherche
+      if (e.target.tagName === 'INPUT') return; 
 
       switch (e.key) {
         case 'ArrowRight':
@@ -255,10 +283,10 @@ export default function App() {
         case 'ArrowLeft':
           if (selectedId && selectedId > 1) setSelectedId(prev => prev - 1);
           break;
-        case ' ':
+        case ' ': 
         case 'Enter':
           e.preventDefault();
-          window.dispatchEvent(new CustomEvent('triggerAudio')); // Lance le son
+          window.dispatchEvent(new CustomEvent('triggerAudio'));
           break;
         case 'r':
           handleRandom();
@@ -275,12 +303,11 @@ export default function App() {
   const toggleCapture = (id) => {
     setCaptured(prev => prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]);
   };
-
+  
   const handleGenChange = (genId) => {
-    setSearchTerm("");
+    setSearchTerm(""); 
     setSelectedType("all");
     setCurrentGen(genId);
-    // loadGeneration appelé via le useEffect grâce au changement de state
   };
 
   const handleRandom = () => {
@@ -288,12 +315,11 @@ export default function App() {
     setSelectedId(randomId);
     setSearchTerm("");
     setSelectedType("all");
-    if (window.innerWidth < 1024) setIsMobileMenuOpen(false);
+    if(window.innerWidth < 1024) setIsMobileMenuOpen(false);
   };
 
   useEffect(() => { localStorage.setItem('captured', JSON.stringify(captured)) }, [captured]);
 
-  // Event Navigation (pour évolutions/formes)
   useEffect(() => {
     const handleChangePokemon = (e) => {
       setSelectedId(e.detail);
@@ -308,19 +334,19 @@ export default function App() {
   // --- RENDU ---
   return (
     <div className="app-container">
-
-      {/* 1. ÉCRAN DE CHARGEMENT ANIMÉ */}
-      {/* On utilise une prop pour le fade-out afin qu'il reste dans le DOM le temps de l'anim */}
+      
+      {/* 1. SPLASH SCREEN */}
       <SplashScreen fadeOut={!appLoading} />
 
-      {/* 2. APPLICATION (Rendue en dessous, prête à apparaître) */}
+      {/* 2. APP CONTENT */}
       <PokemonBackground />
-
+      
+      {/* BOUTON MENU MOBILE (Caché si menu ouvert) */}
       {!isMobileMenuOpen && (
-        <button
-          className="mobile-menu-btn"
+        <button 
+          className="mobile-menu-btn" 
           onClick={() => setIsMobileMenuOpen(true)}
-          style={{ transition: 'opacity 0.3s' }} // Petite transition fluide
+          style={{ transition: 'opacity 0.3s' }}
         >
           ☰ Liste
         </button>
@@ -328,17 +354,17 @@ export default function App() {
 
       <div className={`sidebar-wrapper ${isMobileMenuOpen ? 'open' : ''}`}>
         <button className="close-sidebar-btn" onClick={() => setIsMobileMenuOpen(false)}>×</button>
-        <Sidebar
-          pokemonList={pokemonList}
-          selectedId={pokemonData ? pokemonData.speciesId : selectedId}
-          onSelect={(id) => { setSelectedId(id); setIsMobileMenuOpen(false); }}
-
-          searchTerm={searchTerm}
-          onSearch={setSearchTerm}
-
+        <Sidebar 
+          pokemonList={pokemonList} 
+          selectedId={pokemonData ? pokemonData.speciesId : selectedId} 
+          onSelect={(id) => { setSelectedId(id); setIsMobileMenuOpen(false); }} 
+          
+          searchTerm={searchTerm} 
+          onSearch={setSearchTerm} 
+          
           selectedType={selectedType}
           onTypeChange={setSelectedType}
-
+          
           captured={captured}
           loading={isListLoading}
           currentGen={currentGen}
@@ -356,22 +382,22 @@ export default function App() {
       </div>
 
       {isMobileMenuOpen && <div className="sidebar-overlay" onClick={() => setIsMobileMenuOpen(false)}></div>}
-
+      
       <div className={`main-content ${!selectedId ? 'welcome-mode' : ''}`}>
-        {!selectedId ? (
-          <Welcome />
-        ) : (!pokemonData && loading) ? (
-          <div className="loader-wrapper"><div className="pokeball-animated"></div>Chargement...</div>
-        ) : pokemonData ? (
-          <>
-            <PokemonVisual data={pokemonData} captured={captured} onToggleCapture={toggleCapture} />
-            <PokemonData data={pokemonData} activeTab={activeTab} setActiveTab={setActiveTab} />
-          </>
-        ) : (
-          <div style={{ color: '#4a5568', textAlign: 'center', marginTop: '50px', fontWeight: 'bold' }}>
-            Pokémon introuvable ou erreur de chargement.
-          </div>
-        )}
+         {!selectedId ? (
+            <Welcome />
+         ) : (!pokemonData && loading) ? (
+            <div className="loader-wrapper"><div className="pokeball-animated"></div>Chargement...</div>
+         ) : pokemonData ? (
+             <>
+                <PokemonVisual data={pokemonData} captured={captured} onToggleCapture={toggleCapture} />
+                <PokemonData data={pokemonData} activeTab={activeTab} setActiveTab={setActiveTab} />
+             </>
+         ) : (
+             <div style={{color: '#4a5568', textAlign:'center', marginTop:'50px', fontWeight:'bold'}}>
+                Pokémon introuvable ou erreur de chargement.
+             </div>
+         )}
       </div>
     </div>
   );
