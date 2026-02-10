@@ -84,7 +84,7 @@ export default function PokemonVisual({ data, captured, onToggleCapture }) {
       </div>
 
       <h1 style={{position:'absolute', top:'10px', left:'20px', margin:0, fontSize:'6rem', color:'rgba(0,0,0,0.05)', zIndex:1}}>
-          #{String(data.id).padStart(3,'0')}
+          #{String(data.speciesId || data.id).padStart(3, '0')}
       </h1>
 
       <div style={{position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '10px', zIndex: 2}}>

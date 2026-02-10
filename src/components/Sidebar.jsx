@@ -1,117 +1,128 @@
 import React from 'react';
-import Loader from './Loader'; 
 
-export default function PokemonList({ 
-  pokemonList, 
-  selectedId, 
-  onSelect, 
-  searchTerm, 
-  onSearch, 
-  captured, 
-  loading, 
-  currentGen, 
-  onGenChange, 
-  genConfig 
+const TYPES = [
+  { name: 'all', label: 'Tous les types' },
+  { name: 'normal', label: 'Normal' },
+  { name: 'fire', label: 'Feu' },
+  { name: 'water', label: 'Eau' },
+  { name: 'electric', label: 'Électrik' },
+  { name: 'grass', label: 'Plante' },
+  { name: 'ice', label: 'Glace' },
+  { name: 'fighting', label: 'Combat' },
+  { name: 'poison', label: 'Poison' },
+  { name: 'ground', label: 'Sol' },
+  { name: 'flying', label: 'Vol' },
+  { name: 'psychic', label: 'Psy' },
+  { name: 'bug', label: 'Insecte' },
+  { name: 'rock', label: 'Roche' },
+  { name: 'ghost', label: 'Spectre' },
+  { name: 'dragon', label: 'Dragon' },
+  { name: 'dark', label: 'Ténèbres' },
+  { name: 'steel', label: 'Acier' },
+  { name: 'fairy', label: 'Fée' },
+];
+
+export default function Sidebar({ 
+  pokemonList, selectedId, onSelect, 
+  searchTerm, onSearch, 
+  selectedType, onTypeChange, 
+  captured, loading, 
+  currentGen, onGenChange, genConfig,
+  onRandom,
+  onHome 
 }) {
-  
-  // Filtrage
-  const filtered = pokemonList.filter(p => {
-    const term = searchTerm.toLowerCase();
-    return (
-      p.name.toLowerCase().includes(term) ||
-      p.enName.toLowerCase().includes(term) ||
-      String(p.id).includes(term)
-    );
-  });
 
   return (
-    <div className="sidebar" style={{display:'flex', flexDirection:'column', height:'100%'}}>
-      {/* Titre */}
-      <h2 style={{margin:'0 0 15px 0', fontSize:'1.5rem', fontWeight:'900', color:'#2d3748'}}>
-        COBBLE<span style={{color:'#e53e3e'}}>DEX</span>
-      </h2>
+    <div className="sidebar">
       
-      {/* SÉLECTEUR DE GÉNÉRATION */}
-      <div style={{marginBottom: '15px'}}>
-        <select 
-          value={currentGen} 
-          onChange={(e) => onGenChange(Number(e.target.value))}
-          disabled={loading}
-          style={{
-            width: '100%', padding: '12px', borderRadius: '12px',
-            border: '2px solid #cbd5e0', background: loading ? '#f7fafc' : 'white',
-            fontWeight: 'bold', color: '#2d3748', cursor: loading ? 'wait' : 'pointer',
-            fontSize: '0.9rem', outline: 'none', transition: 'all 0.2s'
-          }}
-        >
-          {genConfig.map(g => (
-            <option key={g.id} value={g.id}>{g.name}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* RECHERCHE */}
-      <input 
-        className="search-input" 
-        placeholder="Rechercher..." 
-        value={searchTerm}
-        onChange={(e) => onSearch(e.target.value)}
-        disabled={loading}
-      />
-      
-      {/* LISTE DÉFILANTE */}
-      <div style={{flex:1, overflowY:'auto', paddingRight:'5px'}}>
+      {/* HEADER FIXE */}
+      <div className="sidebar-header">
         
+        {/* TITRE + DÉ ALÉATOIRE */}
+        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'15px'}}>
+            <h2 
+              onClick={onHome} 
+              style={{
+                margin:0, fontSize:'1.8rem', fontWeight:'800', color:'#2d3748', 
+                letterSpacing:'-1px', cursor: 'pointer'
+              }}
+              title="Retour à l'accueil"
+            >
+              POKÉ<span style={{color:'#e53e3e'}}>DEX</span>
+            </h2>
+        </div>
+        
+        {/* BARRE DE RECHERCHE */}
+        <div style={{marginBottom: '10px'}}>
+          <input 
+            className="search-input" 
+            placeholder="Rechercher (Nom ou N°)..." 
+            value={searchTerm}
+            onChange={(e) => onSearch(e.target.value)}
+            disabled={loading}
+          />
+
+          {/* FILTRES (LIGNE DU DESSOUS) */}
+          <div style={{display:'flex', gap:'10px'}}>
+            {/* TYPE */}
+            <select
+              className="search-input"
+              value={selectedType}
+              onChange={(e) => onTypeChange(e.target.value)}
+              disabled={loading}
+              style={{marginBottom:0, cursor:'pointer'}}
+            >
+              {TYPES.map(t => (
+                <option key={t.name} value={t.name}>{t.label}</option>
+              ))}
+            </select>
+
+            {/* GÉNÉRATION */}
+            <select 
+              className="search-input"
+              value={currentGen} 
+              onChange={(e) => onGenChange(Number(e.target.value))}
+              disabled={loading || searchTerm !== "" || selectedType !== "all"}
+              style={{marginBottom:0, cursor:'pointer'}}
+            >
+              {genConfig.map(g => (
+                <option key={g.id} value={g.id}>{g.name.split(' - ')[1]}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      {/* LISTE DÉFILANTE AVEC LE NOUVEAU LOADER */}
+      <div style={{flex:1, overflowY:'auto', padding:'0 5px'}}>
         {loading ? (
-          <div style={{marginTop: '50px'}}>
-            <Loader text="Voyage vers la région..." />
+          <div className="sidebar-loader-wrapper">
+             <div className="sidebar-pokeball-spinner"></div>
+             <span>Chargement...</span>
           </div>
         ) : (
           <>
-            {filtered.map(p => (
+            {pokemonList.map(p => (
               <div 
                 key={p.id} 
                 className={`list-item ${selectedId === p.id ? 'active' : ''}`}
                 onClick={() => onSelect(p.id)}
               >
-                {/* Sprite Pixel */}
-                <img src={p.sprite} style={{width:'40px', marginRight:'10px'}} alt={p.name} />
+                <img src={p.sprite} style={{width:'40px', marginRight:'10px'}} alt="" loading="lazy"/>
                 
-                {/* Noms */}
                 <div style={{flex:1}}>
-                  <div style={{fontWeight:'600', textTransform:'capitalize'}}>{p.name}</div>
-                  {searchTerm && p.enName.toLowerCase().includes(searchTerm.toLowerCase()) && (
-                     <div style={{fontSize:'0.7rem', color:'#ff5350', fontStyle:'italic'}}>({p.enName})</div>
-                  )}
+                  <div style={{fontWeight:'700', textTransform:'capitalize', fontSize:'0.95rem', color:'#2d3748'}}>{p.name}</div>
+                  <div style={{fontSize:'0.75rem', color:'#a0aec0', fontWeight:'600', fontFamily:'monospace'}}>#{String(p.id).padStart(3,'0')}</div>
                 </div>
 
-                {/* --- INDICATEUR DE CAPTURE (VRAIE POKÉBALL) --- */}
                 {captured.includes(p.id) && (
-                  <div title="Capturé !">
-                    {/* SVG de la vraie Pokéball Classique */}
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      {/* Cercle extérieur (Bordure foncée) */}
-                      <circle cx="12" cy="12" r="10" stroke="#2d3748" strokeWidth="2"/>
-                      {/* Demi-cercle du haut (Rouge) */}
-                      <path d="M2 12C2 6.48 6.48 2 12 2C17.52 2 22 6.48 22 12" fill="#f56565" stroke="#2d3748" strokeWidth="2"/>
-                      {/* Demi-cercle du bas (Blanc) */}
-                      <path d="M22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12" fill="white" stroke="#2d3748" strokeWidth="2"/>
-                      {/* Ligne centrale */}
-                      <line x1="2" y1="12" x2="22" y2="12" stroke="#2d3748" strokeWidth="2"/>
-                      {/* Bouton central extérieur (Blanc) */}
-                      <circle cx="12" cy="12" r="3" fill="white" stroke="#2d3748" strokeWidth="2"/>
-                      {/* Bouton central intérieur (Gris clair) */}
-                      <circle cx="12" cy="12" r="1.5" fill="#cbd5e0"/>
-                    </svg>
-                  </div>
+                  <div title="Capturé" style={{color:'#e53e3e', fontSize:'1.2rem', marginLeft:'10px'}}>•</div>
                 )}
               </div>
             ))}
-
-            {filtered.length === 0 && (
-              <div style={{textAlign:'center', color:'#a0aec0', marginTop:'20px', fontSize:'0.9rem'}}>
-                Aucun Pokémon trouvé.
-              </div>
+            
+            {pokemonList.length === 0 && (
+              <div style={{textAlign:'center', color:'#a0aec0', marginTop:'30px'}}>Aucun résultat.</div>
             )}
           </>
         )}
